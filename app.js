@@ -4,10 +4,15 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
 const ExpressError = require('./utills/ExpressError');
-const campgrounds = require('./routes/campgrounds');
-const reviews = require('./routes/reviews');
 const session = require('express-session');
 const flash = require('connect-flash');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const User = require('./models/user');
+
+const campgroundRoutes = require('./routes/campgrounds');
+const reviewRoutes = require('./routes/reviews');
+const userRoutes = require('./routes/users');
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp', {
     useNewUrlParser: true,
@@ -46,14 +51,34 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 app.use(flash());
 
-app.use('/campgrounds', campgrounds);
-app.use('/campgrounds/:id/reviews', reviews);
+
+// Initialize Passport.js for authentication in the Express.js app
+app.use(passport.initialize());
+
+// Use Passport's session management middleware
+app.use(passport.session());
+
+// Configure Passport to use the LocalStrategy for authentication
+passport.use(new LocalStrategy(User.authenticate()));
+
+// Serialize the user's information to be stored in the session
+passport.serializeUser(User.serializeUser());
+
+// Deserialize the user's information from the session
+passport.deserializeUser(User.deserializeUser());
+
 
 app.use((req, res, next) => {
+    console.log(req.session);
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
 })
+
+app.use('/', userRoutes);
+app.use('/campgrounds', campgroundRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 app.get('/', (req, res) => {
     // res.send('HELLO FROM YELP CAMP');
