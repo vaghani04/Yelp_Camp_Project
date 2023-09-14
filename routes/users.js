@@ -7,14 +7,13 @@ const { route } = require('./campgrounds');
 const users = require('../controllers/users');
 const user = require('../models/user');
 
-router.get('/register', users.renderRegister)
+router.route('/register')
+    .get(users.renderRegister)
+    .post(catchAsync(users.register));
 
-router.post('/register', catchAsync(users.register));
-
-router.get('/login', users.renderLogin)
-
-// 'local' is the name of an authentication strategy. Specifically, it's the name of the strategy being used with Passport.js to authenticate users during the login process.
-router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), users.login)
+router.route('/login')
+    .get(users.renderLogin)
+    .post(passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), users.login) // 'local' is the name of an authentication strategy. Specifically, it's the name of the strategy being used with Passport.js to authenticate users during the login process.
 
 router.get('/logout', users.logout);
 
