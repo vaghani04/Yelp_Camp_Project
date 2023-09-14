@@ -1,3 +1,11 @@
+// env file is a convenient way to store environment-specific variables, such as API keys and database passwords, in a simple text file. This enables you to manage sensitive information consistently while maintaining its security.
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
+
+// console.log(process.env.SECRET);
+// console.log(process.env.API_KEY);
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
