@@ -91,7 +91,8 @@ app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 app.get('/', (req, res) => {
     // res.send('HELLO FROM YELP CAMP');
-    res.render('home');
+    // res.render('home');
+    res.render('campgrounds/home');
 })
 
 // app.get('/makecampground', async (req, res) => {
