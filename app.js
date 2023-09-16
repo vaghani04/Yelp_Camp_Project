@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== "production") {
 
 // console.log(process.env.SECRET);
 // console.log(process.env.API_KEY);
+// console.log(process.env.MAPBOX_TOKEN);
 
 const express = require('express');
 const path = require('path');
