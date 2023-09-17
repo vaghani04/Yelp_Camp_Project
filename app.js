@@ -27,10 +27,12 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 
 // mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp', {
-const MongoDBStore = require("connect-mongo")(session);
+const MongoDBStore = require('connect-mongo');
+// const MongoDBStore = require('connect-mongo').default;
 
-const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
-
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';
+// const dbUrl = 'mongodb://127.0.0.1:27017/yelp-camp';
+// console.log(dbUrl);
 mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     // useCreateIndex: true,        //--> it throwing an error so it's commented -> refer it in future
@@ -53,14 +55,20 @@ app.use(mongoSanitize({
     replaceWith: '_'
 }))
 
+// const bodyParser = require('body-parser');
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+// const secret = 'thisshouldbeabettersecret!';
 
-const store = new MongoDBStore({
-    url: dbUrl,
+const store = MongoDBStore.create({
+// const store = new MongoDBStore({
+    mongoUrl: dbUrl,
+    // mongooseConnection: db,
     secret,
     touchAfter: 24 * 60 * 60
 });
@@ -72,6 +80,7 @@ store.on("error", function (e) {
 const sessionConfig = {
     store,
     name: 'session',
+    // secret: 'thisshouldbeabettersecret!',
     secret,
     resave: false,
     saveUninitialized: true,
@@ -82,6 +91,7 @@ const sessionConfig = {
     }
 }
 
+// app.use(session(sessionConfig));
 app.use(session(sessionConfig));
 app.use(flash());
 app.use(helmet());
