@@ -26,7 +26,12 @@ const userRoutes = require('./routes/users');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 
-mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp', {
+// mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp', {
+const MongoDBStore = require("connect-mongo")(session);
+
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
+
+mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     // useCreateIndex: true,        //--> it throwing an error so it's commented -> refer it in future
     useUnifiedTopology: true,
@@ -52,9 +57,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+
+const store = new MongoDBStore({
+    url: dbUrl,
+    secret,
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
+
 const sessionConfig = {
+    store,
     name: 'session',
-    secret: 'thisshouldbeabettersecret!',
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -75,6 +93,7 @@ const scriptSrcUrls = [
     "https://kit.fontawesome.com",
     "https://cdnjs.cloudflare.com",
     "https://cdn.jsdelivr.net",
+    "https://code.jquery.com",
 ];
 
 const styleSrcUrls = [
@@ -102,12 +121,13 @@ app.use(
             directives: {
                 defaultSrc: [],
                 connectSrc: ["'self'", ...connectSrcUrls],
-                scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+                scriptSrc: ["'self'","'unsafe-inline'", ...scriptSrcUrls],
                 styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
                 workerSrc: ["'self'", "blob:"],
                 objectSrc: [],
                 imgSrc: [
                     "'self'",
+                    "'unsafe-inline'",
                     "blob:",
                     "data:",
                     "https://res.cloudinary.com/drvz6utna/",
